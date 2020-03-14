@@ -104,13 +104,23 @@ df_model[categorical_cols] = df_model[categorical_cols].apply(lambda col: le.fit
 print(df_model.info())
 '''
 categorical_cols=['hr','month','day']
-dummy=pd.get_dummies(df[categorical_cols].astype(str),drop_first=True)
+dummy=pd.get_dummies(df[categorical_cols].astype(str),drop_first=True,dtype='uint8')
 for i,v in enumerate(dummy.columns):
-    df_model[v]=dummy.iloc[i]
+    df_model[v]=dummy[v]
     selection_model_cols_iv.append(v)
-print(df_model.columns)
-print(len(df_model.columns))
+#print(df_model.columns)
+#print(len(df_model.columns))
 ################################
+#DOWNCASTING MY NUMBERS
+down_cast_int = df_model.select_dtypes(include = 'integer').columns 
+down_cast_float = df_model.select_dtypes(include = 'float').columns 
+
+for i,v in enumerate(down_cast_int):
+    df_model[v]=pd.to_numeric(df_model[v], downcast='unsigned')
+for i,v in enumerate(down_cast_float):
+    df_model[v]=pd.to_numeric(df_model[v], downcast='float')
+
+print(df_model.info())
 
 ################################
 #array = df_model.values
