@@ -13,19 +13,17 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import cross_val_score
 from sklearn.decomposition import PCA
 import xgboost as xgb
+import util as util
+import sys
 
-#from sklearn.tree import DecisionTreeClassifier
-#from sklearn.neighbors import KNeighborsClassifier
-#from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-#from sklearn.naive_bayes import GaussianNB
-#from sklearn.preprocessing import LabelEncoder
-#from sklearn.svm import SVC
-#from sklearn.preprocessing import StandardScaler
+try:
+    n_times = int(sys.argv[1])
+except IndexError:
+    n_times=5
 
-plt.style.use('seaborn-whitegrid')
+
 url = 'https://aisgaiap.blob.core.windows.net/aiap6-assessment-data/scooter_rental_data.csv'
 df = pd.read_csv(url)
-###GOTTA DOWNCAST LATER DONT FORGET
 
 #CLEANING WEATHER
 weather_dict = {'lear':'clear',
@@ -131,63 +129,25 @@ for i,v in enumerate(down_cast_float):
     df_model[v]=pd.to_numeric(df_model[v], downcast='float')
 
 print(df_model.info())
+ 
+X = MinMaxScaler().fit_transform(df_model[selection_model_cols_iv].values)
+y = MinMaxScaler().fit_transform(df_model[selection_model_cols_dv].values)
 
-################################
-#array = df_model.values
-X = df_model[selection_model_cols_iv].values
-y = df_model[selection_model_cols_dv].values
+#X_train, X_test, y_train, y_test = model_selection.train_test_split(X,y, test_size = 0.25, random_state=0)
 
-X_train, X_test, y_train, y_test = model_selection.train_test_split(X,y, test_size = 0.25, random_state=0)
-#LinearRegression().fit(X_train, y_train)
-# print(np.info(X_train), np.info(X_test), np.info(y_train), np.info(y_test))
-# prepare configuration for cross validation test harness
-X_fit= MinMaxScaler().fit_transform(X)
-y_fit= MinMaxScaler().fit_transform(y)
-kf = KFold(shuffle=True, n_splits=5)
-# prepare models
-
-X_train_fit= MinMaxScaler().fit_transform(X_train)
-y_train_fit= MinMaxScaler().fit_transform(y_train)
-
-X_test_fit= MinMaxScaler().fit_transform(X_test)
-y_test_fit= MinMaxScaler().fit_transform(y_test)
 
 pca = PCA(0.9)
-X_fit_new = pca.fit_transform(X_fit)
+X_fit = pca.fit_transform(X)
 
-print(pca.explained_variance_ratio_)
-print(np.info(X_fit_new))
+#print(pca.explained_variance_ratio_)
+#print(np.info(X_fit_new))
 
+models = []
+models.append(('LR', LinearRegression()))
+models.append(('SVR', SVR(kernel = 'rbf')))
+models.append(('DTR', DecisionTreeRegressor()))
+models.append(('RFR', RandomForestRegressor(n_estimators = 10)))
+models.append(('XGB', xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = 0.1,
+                max_depth = 5, alpha = 10, n_estimators = 200)))
 
-print('''------------------
-Linear regression accuracy scores...''')
-LR_accuracies = cross_val_score(estimator = LinearRegression(), X = X_fit_new, y = y_fit, cv = kf)
-print(LR_accuracies.mean())
-print(LR_accuracies.std())
-
-
-print('''------------------
-SVR accuracy scores...''')
-SVR_accuracies = cross_val_score(estimator = SVR(kernel = 'rbf'), X = X_fit_new, y = y_fit.ravel(), cv = kf)
-print(SVR_accuracies.mean())
-print(SVR_accuracies.std())
-
-
-print('''------------------
-Decision Tree regression accuracy scores...''')
-DTR_accuracies = cross_val_score(estimator = DecisionTreeRegressor(random_state = 0), X = X_fit_new, y = y_fit.ravel(), cv = kf)
-print(DTR_accuracies.mean())
-print(DTR_accuracies.std())
-
-print('''------------------
-Random Forest regression accuracy scores...''')
-RFR_accuracies = cross_val_score(estimator = RandomForestRegressor(n_estimators = 10, random_state = 0), X = X_fit_new, y = y_fit.ravel(), cv = kf)
-print(RFR_accuracies.mean())
-print(RFR_accuracies.std())
-
-print('''------------------
-XGB accuracy scores...''')
-XGB_accuracies = cross_val_score(estimator = xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = 0.1,
-                max_depth = 5, alpha = 10, n_estimators = 200), X = X_fit_new, y = y_fit.ravel(), cv = kf)
-print(XGB_accuracies.mean())
-print(XGB_accuracies.std())
+util.CompareModels(X_fit, y, models, n_times)

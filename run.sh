@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 ./mlp/mlp.py
+python3 ./mlp/mlp.py "$@"
