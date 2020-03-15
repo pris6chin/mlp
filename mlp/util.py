@@ -12,7 +12,7 @@ import xgboost as xgb
 
 # Compare Algorithms
 
-def CompareModels(X,Y,models,n_splits):
+def CompareModels(X,Y,models,n_splits,scoring):
     # prepare models
     '''models = []
     models.append(('LR', LinearRegression()))
@@ -24,22 +24,21 @@ def CompareModels(X,Y,models,n_splits):
     # evaluate each model in turn
     results = []
     names = []
-    best = ["model",0,0]
-    scoring = 'r2'
+    best = ["model",-100,-100]
     for name, model in models:
         kfold = KFold(n_splits=n_splits, shuffle=True)
         cv_results = cross_val_score(model, X, Y.ravel(), cv=kfold, scoring=scoring)
         results.append(cv_results)
         names.append(name)
         
-        print(f'''In {n_splits} rounds, {name} model got average r2 score of {cv_results.mean()} with standard deviation of {cv_results.std()}.''')
+        print(f'''In {n_splits} rounds, {name} model got average {scoring} score of {abs(cv_results.mean())} with standard deviation of {cv_results.std()}.''')
         if cv_results.mean() > best[1]:
             best[0]=model
             best[1]=cv_results.mean()
             best[2]=cv_results.std()
     
     print(f'''----------------------
-    The best model was {best[0]} with r2 score of {best[1]}, and a r2 standard deviation of {best[2]}.''')
+    The best model was {best[0]} with {scoring} score of {abs(best[1])}, and a {scoring} standard deviation of {abs(best[2])}.''')
 
     # boxplot algorithm comparison
 '''    fig = plt.figure()

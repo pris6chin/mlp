@@ -16,8 +16,17 @@ import xgboost as xgb
 import util as util
 import sys
 
+evaluation_criteria = {1:'neg_root_mean_squared_error', 2:'r2',3:'neg_median_absolute_error'}
+
 try:
-    n_times = int(sys.argv[1])
+    scoring = evaluation_criteria[int(sys.argv[1])]
+except IndexError:
+    scoring='neg_root_mean_squared_error'
+
+
+
+try:
+    n_times = int(sys.argv[2])
 except IndexError:
     n_times=5
 
@@ -97,13 +106,13 @@ Transformed columns temperature and feels-like-temperature created''')
 #print(df.info())
 
 #SELECT MODEL DF 
-print('''------------------
-Some sanity check on the data...''')
+#print('''------------------
+#Some sanity check on the data...''')
 selection_model_cols_iv= ['relative-humidity','windspeed','psi','temperature_trf']
 selection_model_cols_dv= ['total-users']
 df_model = df[selection_model_cols_iv + selection_model_cols_dv]
-print(df_model.describe())
-print(df_model.info())
+#print(df_model.describe())
+#print(df_model.info())
 
 #APPLY DUMMY ENCODING
 '''le = LabelEncoder()
@@ -150,4 +159,4 @@ models.append(('RFR', RandomForestRegressor(n_estimators = 10)))
 models.append(('XGB', xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = 0.1,
                 max_depth = 5, alpha = 10, n_estimators = 200)))
 
-util.CompareModels(X_fit, y, models, n_times)
+util.CompareModels(X_fit, y, models, n_times,scoring)
