@@ -28,11 +28,13 @@ pip3 install -r requirements.txt
 ### Running the file
 
 Execute the run.sh file on your terminal, and key in 2 optional arguments.
-1st optional argument: Model Evaluation Criteria
+
+##### 1st optional argument: Model Evaluation Criteria
 * 1 --> RMSE
 * 2 --> R2 value
 * 3 --> Median Absolute Error
-2nd optional argument: Number of folds in cross validation scoring. Value has to be greater than 1.
+
+##### 2nd optional argument: Number of folds in cross validation scoring. Value has to be greater than 1.
 ```
 ###EXAMPLE###
 ./run.sh 1 2
