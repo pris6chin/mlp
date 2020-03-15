@@ -25,74 +25,38 @@ You will need to install python 3.6.7, and install all packages in their respect
 pip3 install -r requirements.txt
 ```
 
-### Installing
+### Running the file
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
+Execute the run.sh file on your terminal, and key in 2 optional arguments.
+1st optional argument: Model Evaluation Criteria
+* 1 --> RMSE
+* 2 --> R2 value
+* 3 --> Median Absolute Error
+2nd optional argument: Number of folds in cross validation scoring. Value has to be greater than 1.
 ```
-Give the example
-```
-
-And repeat
-
-```
-until finished
+###EXAMPLE###
+./run.sh 1 2
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
+### Sample Output
 ```
-Give an example
+In 3 rounds, LR model got average neg_root_mean_squared_error score of 0.12449529006115519 with standard deviation of 0.0011329188592213036.
+In 3 rounds, SVR model got average neg_root_mean_squared_error score of 0.09488094862013761 with standard deviation of 0.0005461950805368554.
+In 3 rounds, DTR model got average neg_root_mean_squared_error score of 0.11328900303052121 with standard deviation of 0.0010234489626689428.
+In 3 rounds, RFR model got average neg_root_mean_squared_error score of 0.08710899447489406 with standard deviation of 0.0008629366494751925.
+In 3 rounds, XGB model got average neg_root_mean_squared_error score of 0.08701051386807708 with standard deviation of 0.00040105972715497864.
+----------------------
+    The best model was XGBRegressor(alpha=10, base_score=None, booster=None, colsample_bylevel=None,
+             colsample_bynode=None, colsample_bytree=0.3, gamma=None,
+             gpu_id=None, importance_type='gain', interaction_constraints=None,
+             learning_rate=0.1, max_delta_step=None, max_depth=5,
+             min_child_weight=None, missing=nan, monotone_constraints=None,
+             n_estimators=200, n_jobs=None, num_parallel_tree=None,
+             objective='reg:squarederror', random_state=None, reg_alpha=None,
+             reg_lambda=None, scale_pos_weight=None, subsample=None,
+             tree_method=None, validate_parameters=False, verbosity=None) with neg_root_mean_squared_error score of 0.08701051386807708, and a neg_root_mean_squared_error standard deviation of 0.00040105972715497864.
 ```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+* Everyone on stackoverflow, thank you
+
