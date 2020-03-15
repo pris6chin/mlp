@@ -4,13 +4,23 @@ import matplotlib.pylab as plt
 import matplotlib.pyplot as pplt
 import seaborn as sns
 from sklearn import model_selection
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.naive_bayes import GaussianNB
-from sklearn.preprocessing import LabelEncoder
-from sklearn.svm import SVC
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import KFold
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import cross_val_score
+from sklearn.decomposition import PCA
+import xgboost as xgb
+
+#from sklearn.tree import DecisionTreeClassifier
+#from sklearn.neighbors import KNeighborsClassifier
+#from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+#from sklearn.naive_bayes import GaussianNB
+#from sklearn.preprocessing import LabelEncoder
+#from sklearn.svm import SVC
+#from sklearn.preprocessing import StandardScaler
 
 plt.style.use('seaborn-whitegrid')
 url = 'https://aisgaiap.blob.core.windows.net/aiap6-assessment-data/scooter_rental_data.csv'
@@ -91,7 +101,7 @@ Transformed columns temperature and feels-like-temperature created''')
 #SELECT MODEL DF 
 print('''------------------
 Some sanity check on the data...''')
-selection_model_cols_iv= ['relative-humidity','windspeed','psi','temperature_trf','feels-like-temperature_trf']
+selection_model_cols_iv= ['relative-humidity','windspeed','psi','temperature_trf']
 selection_model_cols_dv= ['total-users']
 df_model = df[selection_model_cols_iv + selection_model_cols_dv]
 print(df_model.describe())
@@ -125,32 +135,59 @@ print(df_model.info())
 ################################
 #array = df_model.values
 X = df_model[selection_model_cols_iv].values
-Y = df_model[selection_model_cols_dv].values
+y = df_model[selection_model_cols_dv].values
+
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X,y, test_size = 0.25, random_state=0)
+#LinearRegression().fit(X_train, y_train)
+# print(np.info(X_train), np.info(X_test), np.info(y_train), np.info(y_test))
 # prepare configuration for cross validation test harness
-seed = 7
+X_fit= MinMaxScaler().fit_transform(X)
+y_fit= MinMaxScaler().fit_transform(y)
+kf = KFold(shuffle=True, n_splits=5)
 # prepare models
-models = []
-models.append(('LR', LogisticRegression()))
-models.append(('LDA', LinearDiscriminantAnalysis()))
-models.append(('KNN', KNeighborsClassifier()))
-models.append(('CART', DecisionTreeClassifier()))
-models.append(('NB', GaussianNB()))
-models.append(('SVM', SVC()))
-# evaluate each model in turn
-results = []
-names = []
-scoring = 'accuracy'
-for name, model in models:
-	kfold = model_selection.KFold(n_splits=10, random_state=seed)
-	cv_results = model_selection.cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
-	results.append(cv_results)
-	names.append(name)
-	msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
-	print(msg)
-# boxplot algorithm comparison
-fig = plt.figure()
-fig.suptitle('Algorithm Comparison')
-ax = fig.add_subplot(111)
-plt.boxplot(results)
-ax.set_xticklabels(names)
-plt.show()
+
+X_train_fit= MinMaxScaler().fit_transform(X_train)
+y_train_fit= MinMaxScaler().fit_transform(y_train)
+
+X_test_fit= MinMaxScaler().fit_transform(X_test)
+y_test_fit= MinMaxScaler().fit_transform(y_test)
+
+pca = PCA(0.9)
+X_fit_new = pca.fit_transform(X_fit)
+
+print(pca.explained_variance_ratio_)
+print(np.info(X_fit_new))
+
+
+print('''------------------
+Linear regression accuracy scores...''')
+LR_accuracies = cross_val_score(estimator = LinearRegression(), X = X_fit_new, y = y_fit, cv = kf)
+print(LR_accuracies.mean())
+print(LR_accuracies.std())
+
+
+print('''------------------
+SVR accuracy scores...''')
+SVR_accuracies = cross_val_score(estimator = SVR(kernel = 'rbf'), X = X_fit_new, y = y_fit.ravel(), cv = kf)
+print(SVR_accuracies.mean())
+print(SVR_accuracies.std())
+
+
+print('''------------------
+Decision Tree regression accuracy scores...''')
+DTR_accuracies = cross_val_score(estimator = DecisionTreeRegressor(random_state = 0), X = X_fit_new, y = y_fit.ravel(), cv = kf)
+print(DTR_accuracies.mean())
+print(DTR_accuracies.std())
+
+print('''------------------
+Random Forest regression accuracy scores...''')
+RFR_accuracies = cross_val_score(estimator = RandomForestRegressor(n_estimators = 10, random_state = 0), X = X_fit_new, y = y_fit.ravel(), cv = kf)
+print(RFR_accuracies.mean())
+print(RFR_accuracies.std())
+
+print('''------------------
+XGB accuracy scores...''')
+XGB_accuracies = cross_val_score(estimator = xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = 0.1,
+                max_depth = 5, alpha = 10, n_estimators = 200), X = X_fit_new, y = y_fit.ravel(), cv = kf)
+print(XGB_accuracies.mean())
+print(XGB_accuracies.std())
